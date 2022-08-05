@@ -1,0 +1,49 @@
+version: "3"
+services:
+
+  mongo-express:
+    image: mongo-express
+    environment:
+      #ME_CONFIG_BASICAUTH_USERNAME: root
+      #ME_CONFIG_BASICAUTH_PASSWORD: root
+      ME_CONFIG_MONGODB_PORT: 27017
+      #ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      #ME_CONFIG_MONGODB_ADMINPASSWORD: root
+    links:
+      - mongo
+    ports:
+      - 8081:8081
+    networks:
+      - compasso
+
+  mongo:
+    image: mongo
+    environment:
+      #MONGO_INITDB_ROOT_USERNAME: root
+      #MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_DATA_DIR: /data/db
+      MONGO_LOG_DIR: /dev/null
+    volumes:
+      - ./mongodb/data/db:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - compasso
+      
+  api-rest-mongodb:
+    build: .
+    container_name: api-rest-mongodb
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    environment:
+      - SPRING_DATA_MONGODB_URI:mongodb://mongo:27017/compasso_db
+    ports:
+      - 9999:9999
+    networks: 
+      - compasso
+
+networks: 
+  compasso: 
+    driver: bridge
